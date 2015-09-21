@@ -4,5 +4,5 @@
 # But not directories
 !./*/
 
-# And .git ignore
+# Do not ignore yourself
 !.gitignore
