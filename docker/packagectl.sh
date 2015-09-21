@@ -61,18 +61,10 @@ main()
     local argv=$@
 
     case $action in
-        new)
-            new $argv
-            ;;
-        fetch)
-            fetch $argv
-            ;;
-        build)
-            build $argv
-            ;;
-        all)
-            all
-            ;;
+        new)    new $argv ;;
+        fetch)  fetch $argv ;;
+        build)  build $argv ;;
+        all)    all ;;
     esac
 }
 

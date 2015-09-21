@@ -25,21 +25,13 @@ case $1 in
     build-image)
         docker build -t mkrawiec/rpmbuild docker/
         ;;
-    new)
-        run-packagectl new $2
-        ;;
-    fetch)
-        run-packagectl fetch $2
-        ;;
-    build)
-        run-packagectl build $2
-        ;;
-    all)
-        run-packagectl all $2
-        ;;
-    thinker)
-        run-docker /usr/bin/bash
-        ;;
+
+    new)        run-packagectl new $2 ;;
+    fetch)      run-packagectl fetch $2 ;;
+    build)      run-packagectl build $2 ;;
+    all)        run-packagectl all $2 ;;
+    thinker)    run-docker /usr/bin/bash ;;
+
     *)
         echo 'Blah'
         ;;
