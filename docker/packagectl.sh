@@ -59,8 +59,11 @@ refresh_service()
     fi
     popd
 
-    # Make symlinks to created archives in SOURCES/
     pushd $SOURCES
+    # If there are any broken symlinks to sources delete them
+    find -L . -type l -delete
+
+    # Make fresh symlinks to source files
     for file in $(ls --ignore=service.sh "$SOURCES/$name"); do
         ln -fs ./$name/$file $file
     done
