@@ -9,7 +9,7 @@ SOURCES="$ROOT/SOURCES"
 SPECS="$ROOT/SPECS"
 
 # Prepare set of empty files for new package
-new()
+new_package()
 {
     local name=$1; shift
 
@@ -17,36 +17,75 @@ new()
     touch "$SOURCES/${name}/service.sh"
     touch "$SPECS/${name}.spec"
 
-    echo "Generated files for $name"
+    echo "Generating files for ${name}... Done"
 }
 
-# Pull source, set version (specified in service.sh) and install dependencies
-fetch()
+# Download the pristine sources and repack them into proper archive that can be
+# used in .spec file
+download_sources()
+{
+    local download_url=$1; shift
+    local download_file=${download_url##*/}
+    local output_filename=$1; shift
+
+    rm -f $output_filename.tar.gz
+
+    # save file as tmp with original extension (e.g tmp.zip if zip file)
+    curl -L $download_url -o $download_file
+
+    # repack the downloaded file
+    touch outdir
+    atool --save-outdir=outdir --extract $download_file
+    local outdir=$(cat outdir)
+    mv $outdir $output_filename
+    rm outdir
+    apack ${output_filename}.tar.gz $output_filename
+
+    # remove unpacked dir and original download
+    rm -fr $output_filename
+    rm $download_file
+}
+
+# Populate rpmbuild dir with data from service.sh
+refresh_service()
 {
     local name=$1; shift
 
+    # fetch sources into $name-$version.tar.gz
     pushd "$SOURCES/$name"
     source service.sh
     if [ -n $PKG_DOWNLOAD_URL ]; then
-        curl -O $PKG_DOWNLOAD_URL
+        download_sources $PKG_DOWNLOAD_URL $name-$PKG_VERSION
     fi
+    popd
 
+    # Make symlinks to created archives in SOURCES/
+    pushd $SOURCES
     for file in $(ls --ignore=service.sh "$SOURCES/$name"); do
-        stow $file
+        ln -fs ./$name/$file $file
     done
     popd
 
+    # Update version in .spec file
     sed -i "s/Version:.*/Version: $PKG_VERSION/g" "$SPECS/${name}.spec"
-    sudo dnf builddep $name
+#    sudo dnf builddep $name
 }
 
-# Build a package
-build()
+# Build a package without refreshing the service
+quick_build()
 {
     local name=$1; shift
     pushd "$SPESCS"
     rpmbuild -ba "${name}.spec"
     popd
+}
+
+# Full build with service refresh
+build()
+{
+    local name=$1; shift
+    refresh_service $name
+    quick_build $name
 }
 
 # Fetch & build all packages
@@ -61,10 +100,11 @@ main()
     local argv=$@
 
     case $action in
-        new)    new $argv ;;
-        fetch)  fetch $argv ;;
-        build)  build $argv ;;
-        all)    all ;;
+        new-package)        new_package $argv ;;
+        refresh-service)    refresh_service $argv ;;
+        quick-build)        quick_build $argv ;;
+        build)              build $argv ;;
+        all)                all ;;
     esac
 }
 

@@ -26,11 +26,15 @@ case $1 in
         docker build -t mkrawiec/rpmbuild docker/
         ;;
 
-    new)        run-packagectl new $2 ;;
-    fetch)      run-packagectl fetch $2 ;;
-    build)      run-packagectl build $2 ;;
-    all)        run-packagectl all $2 ;;
+    new-package)        run-packagectl new-package $2 ;;
+    refresh-service)    run-packagectl refresh-service $2 ;;
+    quick-build)        run-packagectl quick-build $2 ;;
+    build)              run-packagectl build $2 ;;
+    all)                run-packagectl all $2 ;;
+
     thinker)    run-docker /usr/bin/bash ;;
+    ed-spec)    $EDITOR rpmbuild/SPECS/${2}.spec ;;
+    ed-service) $EDITOR rpmbuild/SOURCES/$2/service.sh ;;
 
     *)
         echo 'Blah'
