@@ -50,7 +50,7 @@ make_symlinks()
     # Go to project files, find all files that are not service.sh or .spec
     # and symlink them in SOURCES
     find ../_projects/$signature -type f \
-        -not -name 'serivce.sh' \
+        -not -name 'service.sh' \
         -not -name '*.spec' \
         -exec ln -s {} . \;
     popd
