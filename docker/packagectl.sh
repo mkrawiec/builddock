@@ -77,7 +77,8 @@ refresh_service()
 quick_build()
 {
     local name=$1; shift
-    pushd "$SPESCS"
+    pushd "$SPECS"
+    sudo dnf builddep {$name}.spec
     rpmbuild -ba "${name}.spec"
     popd
 }
@@ -86,7 +87,6 @@ quick_build()
 build()
 {
     local name=$1; shift
-    sudo dnf builddep $SPECS/{$name}.spec
     refresh_service $name
     quick_build $name
 }
