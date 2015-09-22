@@ -1,9 +1,9 @@
 [submodule "projects/home"]
 	path = projects/home
-	url = git://github.com/mkrawiec/copr-project-home.git
+	url = git@github.com:mkrawiec/copr-project-home.git
 [submodule "projects/neovim"]
 	path = projects/neovim
-	url = git://github.com/mkrawiec/copr-project-neovim.git
+	url = git@github.com:mkrawiec/copr-project-neovim.git
 [submodule "projects/infinality-bundle"]
 	path = projects/infinality-bundle
-	url = git://github.com/mkrawiec/copr-project-infinality-bundle.git
+	url = git@github.com:mkrawiec/copr-project-infinality-bundle.git
