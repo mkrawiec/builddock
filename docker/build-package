@@ -103,7 +103,7 @@ main()
 
     pushd $SPECS
     sudo dnf -y builddep ${name}.spec
-    rpmbuild -ba "${name}.spec"
+    rpmbuild -ba "${name}.spec" || true
     popd
 
     clean_up $signature
