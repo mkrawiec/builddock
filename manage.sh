@@ -41,8 +41,8 @@ push_build()
 {
     local signature=$1; shift
 
-    git submodule foreach --recursive git checkout master &> /dev/null
     pushd $ROOT/projects/$signature
+    git checkout master
     git add *.src.rpm
     git commit -m "Build new src.rpm for $signature"
     git push -u origin master
