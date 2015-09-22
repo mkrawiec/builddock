@@ -35,9 +35,23 @@ build_package()
     run_docker "build-package $signature"
 }
 
+# Push new build result (src.rpm) to git repo
+push_build()
+{
+    local signature=$1; shift
+
+    git submodule foreach --recursive git checkout master &> /dev/null
+    pushd $ROOT/projects/$signature
+    git add *.src.rpm
+    git commit -m "Build new src.rpm for $signature"
+    git push -u origin master
+    popd
+}
+
 case $1 in
     build-image)    docker build -t mkrawiec/rpmbuild docker/ ;;
     build)          build_package $2 ;;
+    push-build)     push_build $2 ;;
     new-package)    new_package $2 ;;
     thinker)        run_docker /usr/bin/bash ;;
     ed-spec)        vim projects/$2/${2##*/}.spec ;;

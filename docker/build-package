@@ -80,6 +80,12 @@ refresh_service()
 # Clean up tasks
 clean_up()
 {
+    local signature=$1; shift
+    local name=${signature##*/}
+
+    # Add built src.rpm to project files
+    rm -f $PROJECTS/$signature/*.src.rpm
+    cp $RPMBUILD/SRPMS/${name}*.src.rpm $PROJECTS/$signature
 
     # Purge rpmbuild/
     find $RPMBUILD -mindepth 2 -not -name '.gitignore' -delete
@@ -97,7 +103,7 @@ main()
     rpmbuild -ba "${name}.spec"
     popd
 
-    clean_up
+    clean_up $signature
 }
 
 main $@
