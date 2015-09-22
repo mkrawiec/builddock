@@ -82,6 +82,9 @@ clean_up()
 {
     # Remove all the symlinks from SOURCES
     find $SOURCES -type l -delete
+
+    # Remove spec files (after running rpmbuild they are no longer symlinks)
+    rm $SPECS/*.spec
 }
 
 main()
