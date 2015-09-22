@@ -57,3 +57,4 @@ case $1 in
     ed-service)     vim projects/$2/service.sh;;
     *)              echo 'Blah' ;;
 esac
+
