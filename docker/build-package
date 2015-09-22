@@ -85,7 +85,7 @@ clean_up()
 
     # Add built src.rpm to project files
     rm -f $PROJECTS/$signature/*.src.rpm
-    cp $RPMBUILD/SRPMS/${name}*.src.rpm $PROJECTS/$signature
+    cp $RPMBUILD/SRPMS/${name}*.src.rpm $PROJECTS/$signature || true
 
     # Purge rpmbuild/
     find $RPMBUILD -mindepth 2 \
