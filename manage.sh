@@ -31,6 +31,7 @@ build_package()
 {
     local signature=$1; shift
 
+    git submodule update --remote
     echo "Starting build for ${signature}..."
     run_docker "build-package $signature"
 }
