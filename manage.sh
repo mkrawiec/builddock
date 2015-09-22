@@ -2,41 +2,45 @@
 
 ROOT=$(dirname $(readlink -f $0))
 
-run-docker()
+run_docker()
 {
     local app=$1; shift
 
     docker run \
         -v $ROOT/rpmbuild:/home/rpmaker/rpmbuild \
+        -v $ROOT/projects:/home/rpmaker/rpmbuild/_projects \
         --net=host --rm \
         -it mkrawiec/rpmbuild \
         su -c "$app" rpmaker
 }
 
-run-packagectl()
+# Prepare set of empty files for new package
+new_package()
 {
-    local action=$1; shift
-    local package=$1; shift
+    local signature=$1; shift
 
-    run-docker "/packagectl.sh $action $package"
+    mkdir -p $ROOT/projects/$signature
+    touch $ROOT/projects/$signature/service.sh
+    touch $ROOT/projects/$signature/${signature##*/}.spec
+
+    echo "Generating files for ${signature}... Done"
+}
+
+# Build package in docker environment
+build_package()
+{
+    local signature=$1; shift
+
+    echo "Starting build for ${signature}..."
+    run_docker "build-package $signature"
 }
 
 case $1 in
-    build-image)
-        docker build -t mkrawiec/rpmbuild docker/
-        ;;
-
-    new-package)        run-packagectl new-package $2 ;;
-    refresh-service)    run-packagectl refresh-service $2 ;;
-    quick-build)        run-packagectl quick-build $2 ;;
-    build)              run-packagectl build $2 ;;
-    all)                run-packagectl all $2 ;;
-
-    thinker)    run-docker /usr/bin/bash ;;
-    ed-spec)    $EDITOR rpmbuild/SPECS/${2}.spec ;;
-    ed-service) $EDITOR rpmbuild/SOURCES/$2/service.sh ;;
-
-    *)
-        echo 'Blah'
-        ;;
+    build-image)    docker build -t mkrawiec/rpmbuild docker/ ;;
+    build)          build_package $2 ;;
+    new-package)    new_package $2 ;;
+    thinker)        run_docker /usr/bin/bash ;;
+    ed-spec)        vim projects/$2/${2##*/}.spec ;;
+    ed-service)     vim projects/$2/service.sh;;
+    *)              echo 'Blah' ;;
 esac

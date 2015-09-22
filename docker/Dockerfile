@@ -8,4 +8,4 @@ RUN mkdir /home/rpmaker/rpmbuild
 WORKDIR /home/rpmaker/rpmbuild
 RUN echo 'Defaults:rpmaker !authenticate' >> /etc/sudoers
 
-COPY packagectl.sh /packagectl.sh
+COPY build-package /usr/local/bin/build-package
