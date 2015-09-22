@@ -71,7 +71,6 @@ refresh_service()
 
     # Update version in .spec file
     sed -i "s/Version:.*/Version: $PKG_VERSION/g" "$SPECS/${name}.spec"
-#    sudo dnf builddep $name
 }
 
 # Build a package without refreshing the service
@@ -87,6 +86,7 @@ quick_build()
 build()
 {
     local name=$1; shift
+    sudo dnf builddep $SPECS/{$name}.spec
     refresh_service $name
     quick_build $name
 }
