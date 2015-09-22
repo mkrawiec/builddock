@@ -43,14 +43,16 @@ make_symlinks()
 
     pushd $SPECS
     # Symlink .spec file
-    ln -fs ../_projects/$signature/${name}.spec ${name}.spec
+    ln -s ../_projects/$signature/${name}.spec ${name}.spec
     popd
 
     pushd $SOURCES
     # Go to project files, find all files that are not service.sh or .spec
     # and symlink them in SOURCES
-    find ../_projects/$signature -not -name='serivce.sh,${name}.spec' \
-        -exec
+    find ../_projects/$signature -type f \
+        -not -name 'serivce.sh' \
+        -not -name '*.spec' \
+        -exec ln -s {} . \;
     popd
 }
 
