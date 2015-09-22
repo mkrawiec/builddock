@@ -78,7 +78,7 @@ quick_build()
 {
     local name=$1; shift
     pushd "$SPECS"
-    sudo dnf builddep {$name}.spec
+    sudo dnf -y builddep ${name}.spec
     rpmbuild -ba "${name}.spec"
     popd
 }
