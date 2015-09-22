@@ -31,7 +31,6 @@ build_package()
 {
     local signature=$1; shift
 
-    git submodule update --remote
     echo "Starting build for ${signature}..."
     run_docker "build-package $signature"
 }
@@ -42,7 +41,6 @@ push_build()
     local signature=$1; shift
 
     pushd $ROOT/projects/$signature
-    git checkout master
     git add *.src.rpm
     git commit -m "Build new src.rpm for $signature"
     git push -u origin master
