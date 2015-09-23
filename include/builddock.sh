@@ -12,19 +12,17 @@ download_sources()
     local download_file=${download_url##*/}
 
     # Save file as tmp with original extension (e.g tmp.zip if zip file)
-    curl -L $download_url -o $download_file
+    curl -L $download_url -o "tmp_$download_file"
 
     # Repack the downloaded file
-    touch outdir
-    atool --save-outdir=outdir --extract $download_file
-    local outdir=$(cat outdir)
+    touch tmp_outdir
+    atool --save-outdir=tmp_outdir --extract "tmp_$download_file"
+    local outdir=$(cat tmp_outdir)
     mv $outdir $output_filename
-    rm outdir
     apack ${output_filename}.tar.gz $output_filename
 
-    # Remove unpacked dir and original download
-    rm -fr $output_filename
-    rm $download_file
+    # Mark unpacked directory for deletion by service_cleanup
+    mv $output_filename tmp_unpacked_dir
 }
 
 # If there is a service hook defined in service.sh run it
@@ -57,6 +55,14 @@ refresh_service()
     popd
 }
 
+service_cleanup()
+{
+    local signature=$1; shift
+
+    # Remove project files with tmp_ prefix
+    rm -fr $PROJECTS/$signature/tmp_*
+}
+
 # Run $cmd in docker container as rpmaker user
 run_docker()
 {
@@ -77,6 +83,7 @@ build_package()
     echo "Starting build for ${signature}..."
     refresh_service $signature
     run_docker "build-package $signature"
+    service_cleanup $signature
 }
 
 # Prepare set of empty files for new package
