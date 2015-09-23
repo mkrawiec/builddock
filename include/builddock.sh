@@ -82,7 +82,7 @@ build_package()
 
     echo "Starting build for ${signature}..."
     refresh_service $signature
-    run_docker "build-package $signature"
+    run_docker "build-package $signature" || true
     service_cleanup $signature
 }
 

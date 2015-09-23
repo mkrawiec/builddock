@@ -30,7 +30,7 @@ make_symlinks()
 copy_src_rpm()
 {
     rm -f _projects/$signature/*.src.rpm
-    cp SRPMS/${name}*.src.rpm _projects/$signature || true
+    cp SRPMS/${name}*.src.rpm _projects/$signature
 }
 
 run_prebuild_hook()
@@ -53,7 +53,7 @@ build()
 
     pushd SPECS
     sudo dnf -y builddep ${name}.spec
-    rpmbuild -ba "${name}.spec" || true
+    rpmbuild -ba "${name}.spec"
     popd
 
     copy_src_rpm $signature
