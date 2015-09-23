@@ -49,9 +49,9 @@ build()
     local name=${signature##*/}
 
     make_symlinks $signature
+    run_prebuild_hook $signature
 
     pushd SPECS
-    run_prebuild_hook $signature
     sudo dnf -y builddep ${name}.spec
     rpmbuild -ba "${name}.spec" || true
     popd
