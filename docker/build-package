@@ -16,9 +16,10 @@ make_symlinks()
     popd
 
     pushd SOURCES
-    # Go to project files, find all files that are not service.sh or .spec
-    # and symlink them in SOURCES
+    # Symlink files that are neither prefixed with tmp_ nor named service.sh
+    # or *.spec
     find ../_projects/$signature -type f \
+        -not -path "../_projects/$signature/tmp_*" \
         -not -name 'service.sh' \
         -not -name '*.spec' \
         -exec ln -s {} . \;
