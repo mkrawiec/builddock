@@ -3,39 +3,12 @@
 set -o nounset
 set -o errexit
 
-RPMBUILD=/home/rpmaker/rpmbuild
-PROJECTS=$RPMBUILD/_projects
-SOURCES=$RPMBUILD/SOURCES
-SPECS=$RPMBUILD/SPECS
+declare -r RPMBUILD=/home/rpmaker/rpmbuild
+declare -r PROJECTS=$RPMBUILD/_projects
+declare -r SOURCES=$RPMBUILD/SOURCES
+declare -r SPECS=$RPMBUILD/SPECS
 
-# Download the pristine sources and repack them into proper archive that can be
-# used in .spec file
-# @param download_url
-# @param output_filename
-download_sources()
-{
-    local download_url=$1; shift
-    local output_filename=$1; shift
-    local download_file=${download_url##*/}
-
-    # Save file as tmp with original extension (e.g tmp.zip if zip file)
-    curl -L $download_url -o $download_file
-
-    # Repack the downloaded file
-    touch outdir
-    atool --save-outdir=outdir --extract $download_file
-    local outdir=$(cat outdir)
-    mv $outdir $output_filename
-    rm outdir
-    apack ${output_filename}.tar.gz $output_filename
-
-    # Remove unpacked dir and original download
-    rm -fr $output_filename
-    rm $download_file
-}
-
-# Make symlinks from project/ to rpmbuild/
-# @param signature <project>/<package>
+# Make symlinks from rpmbuild/_project/ to rpmbuild/
 make_symlinks()
 {
     local signature=$1; shift
@@ -56,58 +29,38 @@ make_symlinks()
     popd
 }
 
-# Populate rpmbuild dir with data from service.sh
-# @param signature <project>/<package>
-refresh_service()
+# Copy built src.rpm to project files
+copy_src_rpm()
+{
+    rm -f $PROJECTS/$signature/*.src.rpm
+    cp $RPMBUILD/SRPMS/${name}*.src.rpm $PROJECTS/$signature || true
+}
+
+run_prebuild_hook()
+{
+    local signature=$1; shift
+
+    source $PROJECTS/$signature/service.sh
+    if [ "$(type -t pkg_prebuild_hook)" = 'function' ]; then
+        pkg_prebuild_hook
+    fi
+}
+
+build()
 {
     local signature=$1; shift
     local name=${signature##*/}
-
-    pushd $PROJECTS/$signature
-    source service.sh
-    # If download url is set and file does not exist get it
-    if [ -n $PKG_DOWNLOAD_URL ] && [ ! -f $name-${PKG_VERSION}.tar.gz ]; then
-        download_sources $PKG_DOWNLOAD_URL $name-$PKG_VERSION
-    fi
-    popd
 
     make_symlinks $signature
 
-    # Update version in .spec file
-    sed -i "s/Version:.*/Version: $PKG_VERSION/g" "$SPECS/${name}.spec"
-}
-
-# Clean up tasks
-clean_up()
-{
-    local signature=$1; shift
-    local name=${signature##*/}
-
-    # Add built src.rpm to project files
-    rm -f $PROJECTS/$signature/*.src.rpm
-    cp $RPMBUILD/SRPMS/${name}*.src.rpm $PROJECTS/$signature || true
-
-    # Purge rpmbuild/
-    find $RPMBUILD -mindepth 2 \
-        -not -name '.gitignore' \
-        -not -path "$RPMBUILD/_projects*" \
-        -delete
-}
-
-main()
-{
-    local signature=$1; shift
-    local name=${signature##*/}
-
-    refresh_service $signature
-
     pushd $SPECS
+    run_prebuild_hook $signature
     sudo dnf -y builddep ${name}.spec
     rpmbuild -ba "${name}.spec" || true
     popd
 
-    clean_up $signature
+    copy_src_rpm $signature
 }
 
-main $@
+build $@
 
