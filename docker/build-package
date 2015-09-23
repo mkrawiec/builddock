@@ -1,25 +1,21 @@
 #!/usr/bin/env bash
+# pwd -> /home/rpmaker/rpmbuild
 
 set -o nounset
 set -o errexit
 
-declare -r RPMBUILD=/home/rpmaker/rpmbuild
-declare -r PROJECTS=$RPMBUILD/_projects
-declare -r SOURCES=$RPMBUILD/SOURCES
-declare -r SPECS=$RPMBUILD/SPECS
-
-# Make symlinks from rpmbuild/_project/ to rpmbuild/
+# Make symlinks from project files
 make_symlinks()
 {
     local signature=$1; shift
     local name=${signature##*/}
 
-    pushd $SPECS
+    pushd SPECS
     # Symlink .spec file
     ln -s ../_projects/$signature/${name}.spec ${name}.spec
     popd
 
-    pushd $SOURCES
+    pushd SOURCES
     # Go to project files, find all files that are not service.sh or .spec
     # and symlink them in SOURCES
     find ../_projects/$signature -type f \
@@ -32,15 +28,15 @@ make_symlinks()
 # Copy built src.rpm to project files
 copy_src_rpm()
 {
-    rm -f $PROJECTS/$signature/*.src.rpm
-    cp $RPMBUILD/SRPMS/${name}*.src.rpm $PROJECTS/$signature || true
+    rm -f _projects/$signature/*.src.rpm
+    cp SRPMS/${name}*.src.rpm _projects/$signature || true
 }
 
 run_prebuild_hook()
 {
     local signature=$1; shift
 
-    source $PROJECTS/$signature/service.sh
+    source _projects/$signature/service.sh
     if [ "$(type -t pkg_prebuild_hook)" = 'function' ]; then
         pkg_prebuild_hook
     fi
@@ -53,7 +49,7 @@ build()
 
     make_symlinks $signature
 
-    pushd $SPECS
+    pushd SPECS
     run_prebuild_hook $signature
     sudo dnf -y builddep ${name}.spec
     rpmbuild -ba "${name}.spec" || true
