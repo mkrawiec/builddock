@@ -32,7 +32,6 @@ run_service_hook()
 {
     local signature=$1; shift
 
-    source $PROJECTS/$signature/service.sh
     if [ "$(type -t pkg_service_hook)" = 'function' ]; then
         pkg_service_hook
     fi
