@@ -44,7 +44,7 @@ refresh_service()
     pushd $PROJECTS/$signature
     source service.sh
     # If download url is set and file does not exist get it
-    if [ -n $PKG_DOWNLOAD_URL ] && [ ! -f $name-${PKG_VERSION}.tar.gz ]; then
+    if [ -v PKG_DOWNLOAD_URL ] && [ ! -f $name-${PKG_VERSION}.tar.gz ]; then
         download_sources $PKG_DOWNLOAD_URL $name-$PKG_VERSION
     fi
 
