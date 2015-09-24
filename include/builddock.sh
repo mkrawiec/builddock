@@ -18,7 +18,9 @@ download_sources()
     touch tmp_outdir
     atool --save-outdir=tmp_outdir --extract "tmp_$download_file"
     local outdir=$(cat tmp_outdir)
-    mv -if $outdir $output_filename
+    if [ $outdir != $output_filename ]; then
+        mv $outdir $output_filename
+    fi
     apack ${output_filename}.tar.gz $output_filename
 
     # Mark unpacked directory for deletion by service_cleanup
