@@ -25,11 +25,15 @@ make_symlinks()
     popd
 }
 
-# Copy built src.rpm to project files
-copy_src_rpm()
+# Copy all build results to project dir
+copy_rpms()
 {
-    rm -f _projects/$signature/*.src.rpm
-    cp SRPMS/${name}*.src.rpm _projects/$signature
+    local output_dir=_projects/$signature/out
+
+    # First clean output dir from previous builds
+    rm -fr $output_dir; mkdir $output_dir
+
+    cp {SRPMS,RPMS/**}/${name}*.rpm $output_dir
 }
 
 run_prebuild_hook()
@@ -55,7 +59,7 @@ build()
     rpmbuild -ba "${name}.spec"
     popd
 
-    copy_src_rpm $signature
+    copy_rpms $signature
 }
 
 build $@
