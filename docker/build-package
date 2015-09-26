@@ -15,11 +15,10 @@ make_symlinks()
     ln -s ../_projects/$signature/${name}.spec ${name}.spec
     popd
 
+    # Symlink files to rpmbuild/SOURCES
     pushd SOURCES
-    # Symlink files that are neither prefixed with tmp_ nor named service.sh
-    # or *.spec
-    find ../_projects/$signature -type f \
-        -not -path "../_projects/$signature/tmp_*" \
+    find ../_projects/$signature -maxdepth 1 -type f \
+        -not -name 'tmp_*' \
         -not -name 'service.sh' \
         -not -name '*.spec' \
         -exec ln -s {} . \;
