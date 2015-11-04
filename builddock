@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+
+# Set sane default bahaviour
+set -o nounset
+set -o errexit
+
+declare -gr ROOT=$(dirname $(readlink -f $0))
+declare -gr VERSION='0.2'
+
+# Include modules
+source ${ROOT}/include/args.sh; args_init $@
+source ${ROOT}/include/cmd.sh
+source ${ROOT}/include/validator.sh
+source ${ROOT}/include/service.sh
+source ${ROOT}/include/docker.sh
+
+# Run
+case ${ARG_ACTION} in
+    build)
+        validator_apply 'arg_sig' 'pkg_dir' 'target_flag'
+        service_setup
+        docker_mkpackage
+        service_cleanup
+        ;;
+    new)
+        validator_apply 'arg_sig' 'npkg_dir'
+        cmd_init_package
+        ;;
+    tinker)
+        validator_apply 'target_flag'
+        docker_run /usr/bin/bash
+        ;;
+    spec)
+        validator_apply 'arg_sig' 'pkg_dir'
+        cmd_open_editor ${PKG_DIR}/${PKG_NAME}.spec
+        ;;
+    service)
+        validator_apply 'arg_sig' 'pkg_dir'
+        cmd_open_editor ${PKG_DIR}/service.sh
+        ;;
+    *)
+        cmd_display_help
+        ;;
+esac
+
