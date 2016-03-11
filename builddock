@@ -3,6 +3,7 @@
 # Set sane default bahaviour
 set -o nounset
 set -o errexit
+shopt -s extglob
 
 declare -gr ROOT=$(dirname $(readlink -f $0))
 declare -gr VERSION='0.2'
