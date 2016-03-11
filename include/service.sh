@@ -46,15 +46,34 @@ _service_unpack()
     esac
 } >/dev/null
 
+_service_correct_root()
+{
+    local correct_root="${PKG_NAME}-${PKG_VERSION}"
+
+    # Pass if we have root with correct name already
+    [ -d  tmp_vendor_dir/$correct_root ] && return 0
+
+    pushd tmp_vendor_dir
+
+    # If there is a root dir, rename it
+    # Otherwise create the root and move files to it
+    local child_dirs=$(ls -l | grep ^d | wc -l)
+    if [ $child_dirs -eq 1 ]; then
+        mv ./*/ $correct_root
+    else
+        mkdir $correct_root
+        mv !($correct_root) $correct_root
+    fi
+
+    popd
+} >/dev/null
+
 _service_repack()
 {
     local from_dir="tmp_vendor_dir"
     local to_file="${PKG_NAME}-${PKG_VERSION}.tar.gz"
 
-    # Rename the inner dir
-    if [ ! -d $from_dir/${PKG_NAME}-${PKG_VERSION} ]; then
-    mv $from_dir/*/ $from_dir/${PKG_NAME}-${PKG_VERSION}
-    fi
+    _service_correct_root
 
     tar -C $from_dir -czf $to_file .
 } >/dev/null
