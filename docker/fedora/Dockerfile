@@ -1,4 +1,4 @@
-FROM fedora:latest
+FROM fedora:24
 
 # Target-specific variables used in mkpackage
 ENV TARGET_NAME 'fedora'
